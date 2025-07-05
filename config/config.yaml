@@ -1,0 +1,25 @@
+shared_secret: "xTFswqGvUIyKjHgojuxSkbcNORAt1bEr7CImj5yRCjM="
+cookie_secret: "UKWHwukAQNX5xOQI2aCtEq7F3068aiCqSySyTItH0m4="
+address: ":443"
+insecure_server: false
+certificate_file: /pomerium/localhost-cert.pem
+certificate_key_file: /pomerium/localhost-key.pem
+
+idp_provider: google
+idp_client_id: 102047364780-tknhvce4jr81dv6im62rmujl21eq25hn.apps.googleusercontent.com
+idp_client_secret: GOXXXXXXXX
+idp_scopes:
+  - openid
+  - email
+  - profile
+
+authenticate_service_url: https://authenticate.localhost.pomerium.io
+
+routes:
+  - from: https://app.localhost.pomerium.io
+    to: http://backend:8080
+    allowed_domains:
+      - gmail.com
+      - juspay.in
+    pass_identity_headers: true
+    jwt_claims_headers: true

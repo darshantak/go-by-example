@@ -1,0 +1,21 @@
+version: '3.8'
+
+services:
+  pomerium:
+    image: pomerium/pomerium:latest
+    ports:
+      - "443:443"
+    command: ["--config", "/pomerium/config.yaml"]
+    volumes:
+      - ./config/config.yaml:/pomerium/config.yaml:ro
+      - ./config/localhost-cert.pem:/pomerium/localhost-cert.pem:ro
+      - ./config/localhost-key.pem:/pomerium/localhost-key.pem:ro
+    depends_on:
+      - backend
+
+  backend:
+    image: golang:1.21
+    working_dir: /app
+    volumes:
+      - .:/app
+    command: go run main.go
