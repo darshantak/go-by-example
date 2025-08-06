@@ -19,7 +19,7 @@ func main() {
 		}
 		return
 	}
-
+	fmt.Println("Checking in github")
 	exerciseId := os.Args[1]
 	if exercise, exists := exerciseMapper[exerciseId]; exists {
 		fmt.Printf("Running %s....", exerciseId)
