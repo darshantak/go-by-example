@@ -6,49 +6,49 @@ import (
 	"time"
 )
 
-type MockConnection struct {
+type mockConnection struct {
 	id int
 }
 
-func NewMockConnection(id int) *MockConnection {
+func newMockConnection(id int) *mockConnection {
 	fmt.Printf("Connection %d created\n", id)
-	return &MockConnection{id: id}
+	return &mockConnection{id: id}
 }
 
-func (c *MockConnection) Execute(query string) {
+func (c *mockConnection) execute(query string) {
 	fmt.Printf("Connection %d executing query %s\n ", c.id, query)
 	time.Sleep(100 * time.Millisecond)
 }
 
-type ConnectionPool struct {
-	connections chan *MockConnection
+type connectionPool struct {
+	connections chan *mockConnection
 	size        int
 	mu          sync.Mutex
 }
 
-func NewConnectionPool(size int) *ConnectionPool {
-	pool := &ConnectionPool{
-		connections: make(chan *MockConnection, size),
+func newConnectionPool(size int) *connectionPool {
+	pool := &connectionPool{
+		connections: make(chan *mockConnection, size),
 		size:        size,
 	}
 	for i := 0; i < size; i++ {
-		pool.connections <- NewMockConnection(i)
+		pool.connections <- newMockConnection(i)
 	}
 	return pool
 }
 
-func (p *ConnectionPool) GetConnection() *MockConnection {
+func (p *connectionPool) getConnection() *mockConnection {
 	conn := <-p.connections
 	fmt.Printf("Connection %d acquired. Connections in pool: %d\n", conn.id, len(p.connections))
 	return conn
 }
 
-func (p *ConnectionPool) ReleaseConnection(conn *MockConnection) {
+func (p *connectionPool) releaseConnection(conn *mockConnection) {
 	p.connections <- conn
 	fmt.Printf("Connection %d released. Connections in pool: %d\n", conn.id, len(p.connections))
 }
 
-func (p *ConnectionPool) CloseAll() {
+func (p *connectionPool) closeAll() {
 	close(p.connections)
 	for conn := range p.connections {
 		fmt.Printf("Connection %d closed\n", conn.id)
@@ -56,14 +56,14 @@ func (p *ConnectionPool) CloseAll() {
 	fmt.Println("Connection pool closed")
 }
 
-func worker(id int, pool *ConnectionPool, wg *sync.WaitGroup) {
+func worker(id int, pool *connectionPool, wg *sync.WaitGroup) {
 	defer wg.Done()
 
 	fmt.Printf("Worker %d trying to get a connection...\n", id)
-	conn := pool.GetConnection()
+	conn := pool.getConnection()
 	if conn != nil {
-		defer pool.ReleaseConnection(conn)
-		conn.Execute(fmt.Sprintf("SELECT * from users WHERE id=%d\n", id))
+		defer pool.releaseConnection(conn)
+		conn.execute(fmt.Sprintf("SELECT * from users WHERE id=%d\n", id))
 	} else {
 		fmt.Printf("Worker %d could not get a connection\n", id)
 	}
@@ -74,7 +74,7 @@ func ConnectionPoolExercise() {
 	numTasks := 10
 	var wg sync.WaitGroup
 
-	connPool := NewConnectionPool(poolSize)
+	connPool := newConnectionPool(poolSize)
 	fmt.Printf("\nStarting %d tasks with a pool of size %d...\n\n", numTasks, poolSize)
 
 	for i := 0; i < numTasks; i++ {

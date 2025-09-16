@@ -1,0 +1,20 @@
+version: '3.8'
+
+services:
+  db0:
+    image: postgres:14
+    environment:
+      - POSTGRES_USER=admin
+      - POSTGRES_PASSWORD=admin
+      - POSTGRES_DB=shard0
+    ports:
+      - "5432:5432"
+  
+  db1:
+    image: postgres:14
+    environment:
+      - POSTGRES_USER=admin
+      - POSTGRES_PASSWORD=admin
+      - POSTGRES_DB=shard1
+    ports:
+      - "5433:5432" # Note the different port
